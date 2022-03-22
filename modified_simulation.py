@@ -141,11 +141,11 @@ def simulation(trace_file_name):
     result_dict["average_bandwidth"] = average_bandwidth
     result_dict["std_bandwidth"] = std_bandwidth
     result_dict["ABR"] = s.active_abr
-    result_dict["QoE"] = str(stats_qoe)
-    result_dict["avgbr"] = str(stats_avgbr)
-    result_dict["rebuf"] = str(stats_avgrebuf)
-    result_dict["change"] = str(stats_avgchange)
-    result_dict["playtime"] = str(s.PLAYTIME)
-    result_dict["buftime"] = str(s.BUFFTIME)
+    result_dict["QoE"] = stats_qoe
+    result_dict["avgbr"] = stats_avgbr
+    result_dict["rebuf"] = stats_avgrebuf
+    result_dict["change"] = stats_avgchange
+    result_dict["playtime"] = s.PLAYTIME
+    result_dict["buftime"] = s.BUFFTIME
 
     return result_dict
