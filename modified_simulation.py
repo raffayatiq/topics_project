@@ -149,5 +149,3 @@ def simulation(trace_file_name):
     result_dict["buftime"] = str(s.BUFFTIME)
 
     return result_dict
-
-print(simulation("1000_1301_5632.tr"))
