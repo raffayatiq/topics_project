@@ -21,8 +21,8 @@ def usage():
   print >> sys.stderr, "Incorrect usage\nUsage: python " + sys.argv[0] + " <path to trace file>"
   sys.exit(1)
   
-def simulation(trace_file):
-  trace_file = "synthetic_trace_for_configmap/" + trace_file
+def simulation(trace_file_name):
+  trace_file = "synthetic_trace_for_configmap/" + trace_file_name
   gp = getBolaGP()
   bola_vp = getBolaVP(gp)
   configs = []
@@ -133,8 +133,21 @@ def simulation(trace_file):
     
     #print s.trace_file + " param: "+str(param)+" minCell: "+str(s.minCellSize)+" QoE: " + str(s.maxQoE) + " avg. bitrate: " + str(s.AVG_SESSION_BITRATE) +  " buf. ratio: " + str(s.REBUF_RATIO) +" playtime: " + str(s.PLAYTIME) +" buftime: " + str(s.BUFFTIME)
 
-    # we are only concerned with s.BUFFTIME for our experiments
-    # print "tracefile: " + s.trace_file + " ABR: " + s.active_abr + " QoE: " + str(stats_qoe) + " avgbr: " + str(stats_avgbr) +  " rebuf: " + str(stats_avgrebuf) + " change: " + str(stats_avgchange) + " playtime: " + str(s.PLAYTIME) +" buftime: " + str(s.BUFFTIME)
-    return str(s.BUFFTIME) 
+    result_dict = {}
+    parsed_trace_file_name = trace_file_name.split(".")[0].split("_")
+    average_bandwidth = parsed_trace_file_name[1]
+    std_bandwidth = parsed_trace_file_name[2]
+
+    result_dict["average_bandwidth"] = average_bandwidth
+    result_dict["std_bandwidth"] = std_bandwidth
+    result_dict["ABR"] = s.active_abr
+    result_dict["QoE"] = str(stats_qoe)
+    result_dict["avgbr"] = str(stats_avgbr)
+    result_dict["rebuf"] = str(stats_avgrebuf)
+    result_dict["change"] = str(stats_avgchange)
+    result_dict["playtime"] = str(s.PLAYTIME)
+    result_dict["buftime"] = str(s.BUFFTIME)
+
+    return result_dict
 
 print(simulation("1000_1301_5632.tr"))
