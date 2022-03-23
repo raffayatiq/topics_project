@@ -21,11 +21,16 @@ def usage():
   print >> sys.stderr, "Incorrect usage\nUsage: python " + sys.argv[0] + " <path to trace file>"
   sys.exit(1)
   
-def simulation(trace_file_name):
+def simulation(trace_file_name, bufflen, mpc, hyb, bola):
   trace_file = "synthetic_trace_for_configmap/" + trace_file_name
   gp = getBolaGP()
   bola_vp = getBolaVP(gp)
   configs = []
+
+  MAX_BUFFLEN = bufflen
+  MPC_ABR = mpc
+  BOLA_ABR = bola
+  HYB_ABR = hyb
 
   # a dummy config value which has no impact, configs are meaningfully
   # used only in COFIGMAP_GENERATION_MODE
