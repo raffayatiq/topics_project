@@ -5,59 +5,59 @@ from modified_simulation import *
 import multiprocessing
 import threading
 
-def main(abr):
+def main(step_size):
 	traces = os.listdir('./synthetic_trace_for_configmap')
-	
-	abr_dict = {}
-	abr_dict["mpc"] = False
-	abr_dict["hyb"] = False
-	abr_dict["bola"] = False
-	abr_dict[abr] = True
+	abr = None
+
+	if MPC_ABR:
+		abr = "mpc"
+	elif HYB_ABR:
+		abr = "hyb"
+	elif BOLA_ABR:
+		abr = "bola"
 
 	manager = multiprocessing.Manager()
-	result_arr = manager.list()
-	processes = [None] * 5
+	result_dict = manager.dict()
+	processes = [None] * len(traces)
 	
-	for i in range(0, 5):
+	try:
+		result_file = open(abr + "_result.json")
+		previous_results = json.load(result_file)
+		result_dict.update(previous_results)
+	except:
+		pass
+
+	for i in range(0, len(traces), step_size):
 		print(i)
 		trace = traces[i]
-		processes[i] = multiprocessing.Process(target=simulate_trace, args=(trace, abr_dict, result_arr, i, ))
+
+		# check if the trace already exists in result i.e. min buflen for that trace has been found
+		if result_dict.has_key(trace):
+			print(trace + " min buflen already found.")
+			continue
+
+		processes[i] = multiprocessing.Process(target=simulate_trace, args=(trace, result_dict, i, ))
 		processes[i].start()
 
-	for j in range(0, 5):
-		processes[j].join()
+	for j in range(0, len(traces), step_size):
+		if not processes[j] is None:
+			processes[j].join()
 
-	print(result_arr)
 	result_file_name = abr + "_" + "result" + ".json"
 	
 	with open(result_file_name, 'w') as fout:
-		json.dump(list(result_arr), fout)
+		json.dump(dict(result_dict), fout)
 
-def simulate_trace(trace, abr_dict, result_arr, i):
-	BUFFLENS = [2, 4, 6, 8, 10]
+def simulate_trace(trace, result_dict, i):
+	print("Trace:", i, "Bufflen:", MAX_BUFFLEN)
+	try:
+		result = simulation(trace)
 
-	for bufflen in BUFFLENS:
-		print("Trace:", i, "Bufflen:", bufflen)
-		try:
-			result = simulation(trace, bufflen, abr_dict["mpc"], abr_dict["hyb"], abr_dict["bola"])
+		if (result["buftime"] == 0):
+			result["bufflen"] = MAX_BUFFLEN
+			result_dict[trace] = result
+	except Exception as e:
+		print(e)
 
-			if (result["buftime"] == 0):
-				result["bufflen"] = bufflen
-				result_arr.append(result)
-				break
-
-			if (bufflen == 10):
-				print("BUFFLENS ARRAY EXCEEDED")
-		except Exception as e:
-			print(e)
-			continue
-
-start = time.time()
-print("Doing mpc")
-main("mpc")
-end = time.time()
-print("Time elapsed: ", end - start)
-# print("Doing hyb")
-# main("hyb")
-# print("Doing bola")
-# main("bola")
+step_size = int(sys.argv[1])
+main(step_size)
